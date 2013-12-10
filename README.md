@@ -1,5 +1,11 @@
 # bower-angular-touch
 
+This is a fork of official angular touch 1.2.4
+=====
+I added:
+- tapDuration property is added to click event
+- MAX_VERTICAL_DISTANCE for swipe events is increased from 75px to 150px
+
 This repo is for distribution on `bower`. The source for this module is in the
 [main AngularJS repo](https://github.com/angular/angular.js/tree/master/src/ngTouch).
 Please file issues and pull requests against that repo.
