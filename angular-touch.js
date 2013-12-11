@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.4
+ * @license AngularJS v1.2.3.1
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -209,7 +209,7 @@
 
     ngTouch.directive('ngClick', ['$parse', '$timeout', '$rootElement',
         function($parse, $timeout, $rootElement) {
-            var TAP_DURATION = 1050; // Shorter than 1050ms is a tap, longer is a taphold or drag.
+            var TAP_DURATION = 750; // Shorter than 750ms is a tap, longer is a taphold or drag.
             var MOVE_TOLERANCE = 12; // 12px seems to work in most mobile browsers.
             var PREVENT_DURATION = 2500; // 2.5 seconds maximum from preventGhostClick call to click
             var CLICKBUSTER_THRESHOLD = 25; // 25 pixels in any dimension is the limit for busting clicks.
@@ -345,7 +345,9 @@
             // Actual linking function.
             return function(scope, element, attr) {
                 var clickHandler = $parse(attr.ngClick),
+                    longTapHandler = $parse(attr.longTap),
                     tapping = false,
+                    longTapPromise,
                     tapElement,  // Used to blur the element after a tap.
                     startTime,   // Used to check if the tap was held too long.
                     touchStartX,
@@ -354,6 +356,10 @@
                 function resetState() {
                     tapping = false;
                     element.removeClass(ACTIVE_CLASS_NAME);
+                    if(longTapPromise){
+                        $timeout.cancel(longTapPromise);
+                        longTapPromise = null;
+                    }
                 }
 
                 element.on('touchstart', function(event) {
@@ -372,6 +378,10 @@
                     var e = touches[0].originalEvent || touches[0];
                     touchStartX = e.clientX;
                     touchStartY = e.clientY;
+                    longTapPromise = $timeout(function() {
+                        element.triggerHandler('longTap', [event]);
+                        longTapPromise = null;
+                    }, TAP_DURATION + 50);
                 });
 
                 element.on('touchmove', function(event) {
@@ -403,7 +413,6 @@
                             tapElement.blur();
                         }
 
-                        event.tapDuration = diff;
                         if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
                             element.triggerHandler('click', [event]);
                         }
@@ -425,6 +434,12 @@
                 element.on('click', function(event, touchend) {
                     scope.$apply(function() {
                         clickHandler(scope, {$event: (touchend || event)});
+                    });
+                });
+
+                element.on('longTap', function(event, touchstart) {
+                    scope.$apply(function() {
+                        longTapHandler(scope, {$event: (touchstart || event)});
                     });
                 });
 
@@ -504,7 +519,7 @@
     function makeSwipeDirective(directiveName, direction, eventName) {
         ngTouch.directive(directiveName, ['$parse', '$swipe', function($parse, $swipe) {
             // The maximum vertical delta for a swipe should be less than 75px.
-            var MAX_VERTICAL_DISTANCE = 200;
+            var MAX_VERTICAL_DISTANCE = 250;
             // Vertical distance should not be more than a fraction of the horizontal distance.
             var MAX_VERTICAL_RATIO = 0.8;
             // At least a 30px lateral motion is necessary for a swipe.

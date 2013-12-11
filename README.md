@@ -1,9 +1,9 @@
 # bower-angular-touch
 
-This is a fork of official angular touch 1.2.4
+This is a fork of official angular touch 1.2.3
 =====
 I added:
-- tapDuration property is added to click event
+- longTap attribute that gets executed on long touch after 800 ms
 - MAX_VERTICAL_DISTANCE for swipe events is increased from 75px to 150px
 
 This repo is for distribution on `bower`. The source for this module is in the
